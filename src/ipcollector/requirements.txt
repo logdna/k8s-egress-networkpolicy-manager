@@ -1,0 +1,4 @@
+kubernetes==17.14.0a1
+requests
+retry
+pytest
