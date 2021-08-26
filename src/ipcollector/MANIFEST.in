@@ -1,2 +1,0 @@
-recursive-include ipcollector
-include README.md requirements.txt
