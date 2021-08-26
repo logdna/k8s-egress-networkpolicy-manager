@@ -1,0 +1,2 @@
+recursive-include ipcollector
+include requirements.txt

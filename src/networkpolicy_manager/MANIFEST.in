@@ -1,0 +1,2 @@
+recursive-include networkpolicy_manager
+include requirements.txt

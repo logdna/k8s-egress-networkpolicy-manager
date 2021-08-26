@@ -1,0 +1,134 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: networkpolicymanager-sa
+  labels:
+    app.kubernetes.io/name: k8s_egress_networkpolicy
+    app.kubernetes.io/instance: k8s_egress_networkpolicy-networkpolicy-manager
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: networkpolicy-manager
+  labels:
+    app.kubernetes.io/name: k8s_egress_networkpolicy
+    app.kubernetes.io/instance: k8s_egress_networkpolicy-networkpolicy-manager
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get","list", "create", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: networkpolicy-manager
+  labels:
+    app.kubernetes.io/name: k8s_egress_networkpolicy
+    app.kubernetes.io/instance: k8s_egress_networkpolicy-networkpolicy-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: networkpolicy-manager
+subjects:
+  - kind: ServiceAccount
+    name: networkpolicymanager-sa
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: networkpolicy-manager
+  namespace: default
+  labels:
+    app.kubernetes.io/name: k8s_egress_networkpolicy
+    app.kubernetes.io/instance: k8s_egress_networkpolicy-networkpolicy-manager
+rules:
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - networkpolicies
+      - networkpolicies.extensions
+    verbs: ["get", "list", "create", "watch", "delete", "update"]
+  - apiGroups: ["crd.projectcalico.org"]
+    resources:
+      - globalnetworkpolicies
+      - networkpolicies
+    verbs: ["get", "list", "create", "watch", "delete", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: networkpolicy-manager
+  namespace: default
+  labels:
+    app.kubernetes.io/name: k8s_egress_networkpolicy
+    app.kubernetes.io/instance: k8s_egress_networkpolicy-networkpolicy-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: networkpolicy-manager
+subjects:
+  - kind: ServiceAccount
+    name: networkpolicymanager-sa
+    namespace: default
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: networkpolicy-manager-config
+data:
+  ipcurator-sources.yaml: |
+    ---
+    - "http://ipcurator.ipegress:5000/v1/egress/namespace/ipegress/pod/ipcurator":
+        networkPolicy:
+          auto_create_deny_all: True
+          namespace: default
+          name_prefix: example-environment-
+          ingress:
+            podSelector: {"matchLabels": {"app": "ipcurator"}}
+            ports:
+            - protocol: TCP
+              port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: networkpolicy-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: k8s_egress_networkpolicy
+      app.kubernetes.io/instance: k8s_egress_networkpolicy-networkpolicy-manager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: k8s_egress_networkpolicy
+        app.kubernetes.io/instance: k8s_egress_networkpolicy-networkpolicy-manager
+    spec:
+      volumes:
+        - name: app-ingress-sources-volume
+          configMap:
+            name: networkpolicy-manager-config
+      serviceAccountName: networkpolicymanager-sa
+      containers:
+        - name: networkpolicy-manager
+          image: networkpolicy_manager:latest
+          imagePullPolicy: Never
+          env:
+            - name: DEFAULT_REFRESH_RATE
+              value: '5'
+            - name: LOGDATEFMT
+              value: '%Y-%m-%d %H:%M:%S'
+            - name: LOGLEVEL
+              value: INFO
+            - name: LOGFORMAT
+              value: '%(asctime)s %(levelname)-8s %(message)s'
+          volumeMounts:
+          - name: app-ingress-sources-volume
+            mountPath: /etc/ipcurator-sources.yaml
+            subPath: ipcurator-sources.yaml
+      restartPolicy: Always
+      securityContext:
+       runAsUser: 10001
+      automountServiceAccountToken: true
+      restartPolicy: Always
