@@ -26,7 +26,6 @@ import json
 import logging
 import os
 import re
-import time
 
 app = Flask(__name__, static_url_path="")
 auth = HTTPBasicAuth()
