@@ -35,7 +35,7 @@ The (un-templated) k8s resources are found in `./src/ipcollector/deployments/min
 
 ### Unit Tests
 
-Run ` make test_ipcollector` in the root of the git directory
+Run ` make test-pytest-ipcollector` in the root of the git directory
 
 * NOTE: You will need pytest installed locally, if you do not have it `pip3 install pytest`
 

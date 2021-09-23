@@ -1,0 +1,11 @@
+---
+- "http://ipcurator:5000/v1/egress/namespace/default/pod/ipcurator":
+    networkPolicy:
+      auto_create_deny_all: True
+      namespace: default
+      name_prefix: example-environment-
+      ingress:
+        podSelector: {"matchLabels": {"app": "ipcurator"}}
+        ports:
+        - protocol: TCP
+          port: 80

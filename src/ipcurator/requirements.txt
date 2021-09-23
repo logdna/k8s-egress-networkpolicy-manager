@@ -1,0 +1,10 @@
+kubernetes==17.14.0a1
+pytest
+flask-HTTPAuth
+flask
+retry
+requests
+pytest-dependency
+IPy
+ipwhois
+netaddr

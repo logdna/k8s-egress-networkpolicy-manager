@@ -1,0 +1,2 @@
+recursive-include ipcurator
+include README.md requirements.txt
