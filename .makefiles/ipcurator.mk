@@ -112,7 +112,7 @@ ifneq (,$(DOCKERFILE_IPCURATOR))
 endif
 
 .PHONY: publish
-publish:: publish-image-gcr publish-image-dockerhub
+publish:: publish-image-gcr
 
 .PHONY:publish-image-gcr
 publish-image-gcr::

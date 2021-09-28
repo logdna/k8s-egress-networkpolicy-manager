@@ -27,12 +27,12 @@ pipeline {
       }
     }
     stage('Publish') {
-      when {
-        anyOf {
-          branch "master"
-          branch "main"
-        }
-      }
+      // when {
+      //   anyOf {
+      //     branch "master"
+      //     branch "main"
+      //   }
+      // }
       steps {
         echo "Publish to docker.io and GCR..."
         script {
