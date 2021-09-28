@@ -4,7 +4,8 @@ DOCKER_PRIVATE_IMAGE_IPCOLLECTOR ?= us.gcr.io/logdna-k8s/ipcollector
 DOCKER_PUBLIC_IMAGE_IPCOLLECTOR ?= docker.io/logdna/ipcollector
 DOCKERFILE_IPCOLLECTOR ?= $(DOCKERFILE_IPCOLLECTOR_PATH)/Dockerfile
 APP_COLLECTOR_SRC ?= src/ipcollector
-APP_IPCOLLECTOR_VERSION ?= $(grep '__version__ =' src/ipcollector/ipcollector/__init__.py | cut -d' ' -f3 | xargs)
+APP_IPCOLLECTOR_VERSION ?= $(shell REQUIREMENTS_TXT=./src/ipcollector/requirements.txt; python3 src/ipcollector/setup.py --version)
+
 
 ## Define sources for rendering and templating
 GIT_SHA1 ?= $(shell git log --pretty=format:'%h' -n 1)

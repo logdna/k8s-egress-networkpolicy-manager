@@ -5,7 +5,7 @@ DOCKER_IMAGE_IPCURATOR ?= us.gcr.io/logdna-k8s/ipcurator
 DOCKER_PUBLIC_IMAGE_IPCURATOR ?= docker.io/logdna/ipcurator
 DOCKERFILE_IPCURATOR ?= $(DOCKERFILE_IPCURATOR_PATH)/Dockerfile
 APP_IPCURATOR_SRC ?= src/ipcurator
-APP_IPCURATOR_VERSION ?= $(grep '__version__ =' src/ipcurator/ipcurator/__init__.py | cut -d' ' -f3 | xargs)
+APP_IPCURATOR_VERSION ?= $(shell REQUIREMENTS_TXT=./src/ipcurator/requirements.txt; python3 src/ipcurator/setup.py --version)
 
 ## Define sources for rendering and templating
 GIT_SHA1 ?= $(shell git log --pretty=format:'%h' -n 1)
