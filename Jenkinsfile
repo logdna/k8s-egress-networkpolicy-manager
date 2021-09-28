@@ -23,7 +23,7 @@ pipeline {
     stage('Build') {
       steps {
         echo "Building..."
-        sh 'make build-image'
+        sh 'make build'
       }
     }
     stage('Publish') {
@@ -40,7 +40,7 @@ pipeline {
             'https://index.docker.io/v1/',
             'dockerhub-username-password'
           ) {
-            sh 'make publish-image'
+            sh 'make publish'
           }
         }
       }
