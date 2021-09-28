@@ -135,3 +135,9 @@ ifneq (,$(DOCKERFILE_NETWORKPOLICYMANAGER))
 	done
 endif
 
+.PHONY:test
+test: test-pytest-networkpolicy_manager
+
+.PHONY:test-pytest-networkpolicy_manager
+test-pytest-networkpolicy_manager:         ## Runs pytest suite
+	$(DOCKER) run -v $(PWD):/workdir:Z -v $(PWD):/data:Z $(PYTHON_IMAGE):$(PYTHON_VERSION) /bin/bash -c 'bash /data/scripts/test_networkpolicy_manager.sh'
