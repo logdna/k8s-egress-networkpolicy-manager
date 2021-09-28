@@ -135,8 +135,8 @@ ifneq (,$(DOCKERFILE_IPCURATOR))
 endif
 
 .PHONY:test
-test: test-pytest-ipcollector
+test:: test-pytest-ipcollector
 
 .PHONY:test-pytest-ipcollector
-test-pytest-ipcollector:         ## Runs pytest suite
+test-pytest-ipcollector::         ## Runs pytest suite
 	$(DOCKER) run -v $(PWD):/workdir:Z -v $(PWD):/data:Z $(PYTHON_IMAGE):$(PYTHON_VERSION) /bin/bash -c 'bash /data/scripts/test_ipcollector.sh'
