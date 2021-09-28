@@ -1,0 +1,9 @@
+BUILD_DATESTAMP=20210928T202644Z
+BUILD_ENV=tmp/build-env
+BUILD_URL=localbuild://jon@logdna-mbp.lan
+BUILD_VERSION=20210928T202644Z
+GIT_BRANCH=main
+GIT_INFO=tmp/.git-info.c8c2345
+GIT_SHA1=c8c2345
+GIT_URL=git@github.com:logdna/k8s-egress-networkpolicy-manager.git
+RELEASE_VERSION=20210928T202643Z

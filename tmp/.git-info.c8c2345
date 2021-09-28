@@ -1,0 +1,4 @@
+GIT_BRANCH=main
+GIT_INFO=tmp/.git-info.c8c2345
+GIT_SHA1=c8c2345
+GIT_URL=git@github.com:logdna/k8s-egress-networkpolicy-manager.git
