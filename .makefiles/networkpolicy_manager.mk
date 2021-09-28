@@ -5,7 +5,8 @@ DOCKER_PRIVATE_IMAGE_NETWORKPOLICYMANAGER ?= us.gcr.io/logdna-k8s/networkpolicy_
 DOCKER_PUBLIC_IMAGE_NETWORKPOLICYMANAGER ?= docker.io/logdna/networkpolicy_manager
 DOCKERFILE_NETWORKPOLICYMANAGER ?= $(DOCKERFILE_NETWORKPOLICYMANAGER_PATH)/Dockerfile
 APP_NETWORKPOLICYMANAGER_SRC ?= src/networkpolicy_manager
-APP_NETWORKPOLICYMANAGER_VERSION ?= $(shell REQUIREMENTS_TXT=./src/networkpolicy_manager/requirements.txt; python3 src/networkpolicy_manager/setup.py --version)
+export REQUIREMENTS_TXT=./src/networkpolicy_manager/requirements.txt
+APP_NETWORKPOLICYMANAGER_VERSION ?= $(shell python3 src/networkpolicy_manager/setup.py --version)
 
 ## Define sources for rendering and templating
 GIT_SHA1 ?= $(shell git log --pretty=format:'%h' -n 1)
