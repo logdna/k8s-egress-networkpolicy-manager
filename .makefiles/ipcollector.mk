@@ -139,4 +139,3 @@ test:: test-pytest-ipcurator
 .PHONY:test-pytest-ipcurator
 test-pytest-ipcurator::         ## Runs pytest suite
 	$(DOCKER) run -v $(PWD):/workdir:Z -v $(PWD):/data:Z $(PYTHON_IMAGE):$(PYTHON_VERSION) /bin/bash -c 'bash /data/scripts/test_ipcurator.sh'
-
