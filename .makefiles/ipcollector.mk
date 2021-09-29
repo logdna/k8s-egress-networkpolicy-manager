@@ -26,7 +26,7 @@ PYTHON_IMAGE ?= logdna/tooling-python
 APP_IPCOLLECTOR_MAJOR_VERSION ?= $(shell echo $(APP_IPCOLLECTOR_VERSION) | cut -f1 -d'.')
 APP_IPCOLLECTOR_MINOR_VERSION ?= $(shell echo $(APP_IPCOLLECTOR_VERSION) | cut -f1-2 -d'.')
 APP_IPCOLLECTOR_PATCH_VERSION ?= $(shell echo $(APP_IPCOLLECTOR_VERSION))
-APP_IPCOLLECTOR_BUILD_VERSION := $(APP_IPCOLLECTOR_PATCH_VERSION)-$(BUILD_DATESTAMP)'
+APP_IPCOLLECTOR_BUILD_VERSION := '$(APP_IPCOLLECTOR_PATCH_VERSION)-$(BUILD_DATESTAMP)'
 
 # Docker Variables - networkpolicymanager
 # Build out a full list of tags for the image build
@@ -113,10 +113,6 @@ test:: test-pytest-ipcurator
 test-pytest-ipcurator::         ## Runs pytest suite
 	$(DOCKER) run -v $(PWD):/workdir:Z -v $(PWD):/data:Z $(PYTHON_IMAGE):$(PYTHON_VERSION) /bin/bash -c 'bash /data/scripts/test_ipcurator.sh'
 
-lol:
-	echo ------; \
-	echo test$(HMM); \
-	echo ------
 
 #     @if [ "test" = "test" ]; then\
 #         echo "Hello world";\

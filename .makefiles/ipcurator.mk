@@ -26,7 +26,7 @@ PYTHON_IMAGE ?= logdna/tooling-python
 APP_IPCURATOR_MAJOR_VERSION ?= $(shell echo $(APP_IPCURATOR_VERSION) | cut -f1 -d'.')
 APP_IPCURATOR_MINOR_VERSION ?= $(shell echo $(APP_IPCURATOR_VERSION) | cut -f1-2 -d'.')
 APP_IPCURATOR_PATCH_VERSION ?= $(shell echo $(APP_IPCURATOR_VERSION))
-APP_IPCURATOR_BUILD_VERSION := $(APP_IPCURATOR_PATCH_VERSION)-$(BUILD_DATESTAMP)'
+APP_IPCURATOR_BUILD_VERSION := '$(APP_IPCURATOR_PATCH_VERSION)-$(BUILD_DATESTAMP)'
 
 # Docker Variables - networkpolicymanager
 # Build out a full list of tags for the image build
