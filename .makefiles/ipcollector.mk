@@ -4,8 +4,7 @@ DOCKER_PRIVATE_IMAGE_IPCOLLECTOR ?= us.gcr.io/logdna-k8s/ipcollector
 DOCKER_PUBLIC_IMAGE_IPCOLLECTOR ?= docker.io/logdna/ipcollector
 DOCKERFILE_IPCOLLECTOR ?= $(DOCKERFILE_IPCOLLECTOR_PATH)/Dockerfile
 APP_COLLECTOR_SRC ?= src/ipcollector
-export REQUIREMENTS_TXT=./src/ipcollector/requirements.txt
-APP_IPCOLLECTOR_VERSION ?= $(shell python3 src/ipcollector/setup.py --version)
+APP_IPCOLLECTOR_VERSION ?= $(shell grep '__version__ =' src/ipcollector/ipcollector/__init__.py | cut -d' ' -f3 | xargs)
 
 
 ## Define sources for rendering and templating
@@ -21,46 +20,19 @@ export PYTHON_VERSION ?= 3.9
 PYTHON_IMAGE ?= logdna/tooling-python
 
 
-# ipcollector version stuff
-# ------
-ifeq ("$(BUILD_ENV)", "$(wildcard $(BUILD_ENV))")
-	# if tmp/build-env exists on disk, use it
-	include $(BUILD_ENV)
-else ifneq "$(APP_IPCOLLECTOR_VERSION)" ""
-	# Tooling repositories are centered around the version of an
-	# upstream off the shelf application. When working with that
-	# type of application we want to add their version unmodified
-	# as a prefix when creating a DATESTAMP based internal
-	# release version.
-	APP_IPCOLLECTOR_MAJOR_VERSION = $(shell echo $(APP_IPCOLLECTOR_VERSION) | cut -f1 -d'.')
-	APP_IPCOLLECTOR_MINOR_VERSION = $(shell echo $(APP_IPCOLLECTOR_VERSION) | cut -f1-2 -d'.')
-	APP_IPCOLLECTOR_PATCH_VERSION = $(shell echo $(APP_IPCOLLECTOR_VERSION))
-	APP_IPCOLLECTOR_BUILD_VERSION := $(APP_IPCOLLECTOR_PATCH_VERSION)-$(BUILD_DATESTAMP)
-	ifneq ("$(GIT_BRANCH)", $(filter "$(GIT_BRANCH)", "master" "main"))
-		APP_IPCOLLECTOR_RELEASE_VERSION := $(APP_IPCOLLECTOR_BUILD_VERSION)
-	else ifeq ("$(ALWAYS_TIMESTAMP_VERSION)", "true")
-		APP_IPCOLLECTOR_RELEASE_VERSION := $(APP_IPCOLLECTOR_BUILD_VERSION)
-	else
-		APP_IPCOLLECTOR_RELEASE_VERSION := $(APP_IPCOLLECTOR_PATCH_VERSION)
-	endif
-else
-	# For repositories, like control or tooling, that don't have their own
-	# versioning, we default to a datestamp format. For tooling
-	# repositories we want the prefix of version, which is handled above.
-	# TODO: Add warning that APP_VERSION WAS EMPTY so defaulting to CalVer
-	# based timestamp version
-	APP_IPCOLLECTOR_BUILD_VERSION = $(BUILD_DATESTAMP)
-	APP_IPCOLLECTOR_APP_IPCOLLECTOR_RELEASE_VERSION := $(APP_IPCOLLECTOR_BUILD_VERSION)
-endif
 
-# Docker Variables - ipcollector
+# networkpolicymanager version stuff
+# ------
+APP_IPCOLLECTOR_MAJOR_VERSION ?= $(shell echo $(APP_IPCOLLECTOR_VERSION) | cut -f1 -d'.')
+APP_IPCOLLECTOR_MINOR_VERSION ?= $(shell echo $(APP_IPCOLLECTOR_VERSION) | cut -f1-2 -d'.')
+APP_IPCOLLECTOR_PATCH_VERSION ?= $(shell echo $(APP_IPCOLLECTOR_VERSION))
+APP_IPCOLLECTOR_BUILD_VERSION := $(APP_IPCOLLECTOR_PATCH_VERSION)-$(BUILD_DATESTAMP)'
+
+# Docker Variables - networkpolicymanager
 # Build out a full list of tags for the image build
-DOCKER_TAGS_IPCOLLECTOR := $(GIT_SHA1) $(APP_IPCOLLECTOR_RELEASE_VERSION)
-ifneq ("$(BUILD_VERSION)", "$(APP_IPCOLLECTOR_RELEASE_VERSION)")
-	DOCKER_TAGS_IPCOLLECTOR := $(DOCKER_TAGS_IPCOLLECTOR) $(APP_IPCOLLECTOR_MINOR_VERSION) $(APP_IPCOLLECTOR_MAJOR_VERSION)
-endif
-# This creates a `docker build` cli-compatible list of the tags
+DOCKER_TAGS_IPCOLLECTOR := $(GIT_SHA1) $(APP_IPCOLLECTOR_VERSION) $(APP_IPCOLLECTOR_MAJOR_VERSION) $(APP_IPCOLLECTOR_MINOR_VERSION)
 DOCKER_BUILD_TAGS_IPCOLLECTOR := $(addprefix --tag $(DOCKER_PRIVATE_IMAGE_IPCOLLECTOR):,$(DOCKER_TAGS_IPCOLLECTOR))
+
 
 # Adjust docker build behaviors
 ifeq ("$(DOCKER_BUILD_ALWAYS_PULL)", "true")
@@ -112,7 +84,7 @@ ifneq (,$(DOCKERFILE_IPCOLLECTOR))
 endif
 
 .PHONY: publish
-publish:: publish-image-gcr
+publish:: publish-image-gcr publish-image-dockerhub
 
 .PHONY:publish-image-gcr
 publish-image-gcr::
@@ -140,3 +112,12 @@ test:: test-pytest-ipcurator
 .PHONY:test-pytest-ipcurator
 test-pytest-ipcurator::         ## Runs pytest suite
 	$(DOCKER) run -v $(PWD):/workdir:Z -v $(PWD):/data:Z $(PYTHON_IMAGE):$(PYTHON_VERSION) /bin/bash -c 'bash /data/scripts/test_ipcurator.sh'
+
+lol:
+	echo ------; \
+	echo test$(HMM); \
+	echo ------
+
+#     @if [ "test" = "test" ]; then\
+#         echo "Hello world";\
+#     fi

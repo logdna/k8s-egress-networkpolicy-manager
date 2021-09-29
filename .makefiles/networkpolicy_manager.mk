@@ -5,8 +5,7 @@ DOCKER_PRIVATE_IMAGE_NETWORKPOLICYMANAGER ?= us.gcr.io/logdna-k8s/networkpolicy_
 DOCKER_PUBLIC_IMAGE_NETWORKPOLICYMANAGER ?= docker.io/logdna/networkpolicy_manager
 DOCKERFILE_NETWORKPOLICYMANAGER ?= $(DOCKERFILE_NETWORKPOLICYMANAGER_PATH)/Dockerfile
 APP_NETWORKPOLICYMANAGER_SRC ?= src/networkpolicy_manager
-export REQUIREMENTS_TXT=./src/networkpolicy_manager/requirements.txt
-APP_NETWORKPOLICYMANAGER_VERSION ?= $(shell python3 src/networkpolicy_manager/setup.py --version)
+APP_NETWORKPOLICYMANAGER_VERSION ?= $(shell grep '__version__ =' src/networkpolicy_manager/networkpolicy_manager/__init__.py | cut -d' ' -f3 | xargs)
 
 ## Define sources for rendering and templating
 GIT_SHA1 ?= $(shell git log --pretty=format:'%h' -n 1)
@@ -20,48 +19,16 @@ KUBECTL_VERSION ?= 1.18.2
 export PYTHON_VERSION ?= 3.9
 PYTHON_IMAGE ?= logdna/tooling-python
 
-
 # networkpolicymanager version stuff
 # ------
-ifeq ("$(BUILD_ENV)", "$(wildcard $(BUILD_ENV))")
-	# if tmp/build-env exists on disk, use it
-	include $(BUILD_ENV)
-else ifneq "$(APP_NETWORKPOLICYMANAGER_VERSION)" ""
-	# Tooling repositories are centered around the version of an
-	# upstream off the shelf application. When working with that
-	# type of application we want to add their version unmodified
-	# as a prefix when creating a DATESTAMP based internal
-	# release version.
-	APP_NETWORKPOLICYMANAGER_MAJOR_VERSION = $(shell echo $(APP_NETWORKPOLICYMANAGER_VERSION) | cut -f1 -d'.')
-	APP_NETWORKPOLICYMANAGER_MINOR_VERSION = $(shell echo $(APP_NETWORKPOLICYMANAGER_VERSION) | cut -f1-2 -d'.')
-	APP_NETWORKPOLICYMANAGER_PATCH_VERSION = $(shell echo $(APP_NETWORKPOLICYMANAGER_VERSION))
-	APP_NETWORKPOLICYMANAGER_BUILD_VERSION := $(APP_NETWORKPOLICYMANAGER_PATCH_VERSION)-$(BUILD_DATESTAMP)
-	ifneq ("$(GIT_BRANCH)", $(filter "$(GIT_BRANCH)", "master" "main"))
-		APP_NETWORKPOLICYMANAGER_RELEASE_VERSION := $(APP_NETWORKPOLICYMANAGER_BUILD_VERSION)
-	else ifeq ("$(ALWAYS_TIMESTAMP_VERSION)", "true")
-		APP_NETWORKPOLICYMANAGER_RELEASE_VERSION := $(APP_NETWORKPOLICYMANAGER_BUILD_VERSION)
-	else
-		APP_NETWORKPOLICYMANAGER_RELEASE_VERSION := $(APP_NETWORKPOLICYMANAGER_PATCH_VERSION)
-	endif
-else
-	# For repositories, like control or tooling, that don't have their own
-	# versioning, we default to a datestamp format. For tooling
-	# repositories we want the prefix of version, which is handled above.
-	# TODO: Add warning that APP_VERSION WAS EMPTY so defaulting to CalVer
-	# based timestamp version
-	APP_NETWORKPOLICYMANAGER_BUILD_VERSION = $(BUILD_DATESTAMP)
-	APP_NETWORKPOLICYMANAGER_APP_NETWORKPOLICYMANAGER_RELEASE_VERSION := $(APP_NETWORKPOLICYMANAGER_BUILD_VERSION)
-endif
-
-
+APP_NETWORKPOLICYMANAGER_MAJOR_VERSION ?= $(shell echo $(APP_NETWORKPOLICYMANAGER_VERSION) | cut -f1 -d'.')
+APP_NETWORKPOLICYMANAGER_MINOR_VERSION ?= $(shell echo $(APP_NETWORKPOLICYMANAGER_VERSION) | cut -f1-2 -d'.')
+APP_NETWORKPOLICYMANAGER_PATCH_VERSION ?= $(shell echo $(APP_NETWORKPOLICYMANAGER_VERSION))
+APP_NETWORKPOLICYMANAGER_BUILD_VERSION := $(APP_NETWORKPOLICYMANAGER_PATCH_VERSION)-$(BUILD_DATESTAMP)'
 
 # Docker Variables - networkpolicymanager
 # Build out a full list of tags for the image build
-DOCKER_TAGS_NETWORKPOLICYMANAGER := $(GIT_SHA1) $(APP_NETWORKPOLICYMANAGER_RELEASE_VERSION)
-ifneq ("$(BUILD_VERSION)", "$(APP_NETWORKPOLICYMANAGER_RELEASE_VERSION)")
-	DOCKER_TAGS_NETWORKPOLICYMANAGER := $(DOCKER_TAGS_NETWORKPOLICYMANAGER) $(APP_NETWORKPOLICYMANAGER_MINOR_VERSION) $(APP_NETWORKPOLICYMANAGER_MAJOR_VERSION)
-endif
-# This creates a `docker build` cli-compatible list of the tags
+DOCKER_TAGS_NETWORKPOLICYMANAGER := $(GIT_SHA1) $(APP_NETWORKPOLICYMANAGER_VERSION) $(APP_NETWORKPOLICYMANAGER_MAJOR_VERSION) $(APP_NETWORKPOLICYMANAGER_MINOR_VERSION)
 DOCKER_BUILD_TAGS_NETWORKPOLICYMANAGER := $(addprefix --tag $(DOCKER_PRIVATE_IMAGE_NETWORKPOLICYMANAGER):,$(DOCKER_TAGS_NETWORKPOLICYMANAGER))
 
 # Adjust docker build behaviors
@@ -114,7 +81,7 @@ ifneq (,$(DOCKERFILE_NETWORKPOLICYMANAGER))
 endif
 
 .PHONY: publish
-publish:: publish-image-gcr
+publish:: publish-image-gcr publish-image-dockerhub
 
 .PHONY:publish-image-gcr
 publish-image-gcr::
