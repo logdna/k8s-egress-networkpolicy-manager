@@ -8,34 +8,6 @@ metadata:
     app.kubernetes.io/name: k8s_egress_networkpolicy
     app.kubernetes.io/instance: k8s_egress_networkpolicy-ipcurator
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: ipcurator
-  labels:
-    app.kubernetes.io/name: k8s_egress_networkpolicy
-    app.kubernetes.io/instance: k8s_egress_networkpolicy-ipcurator
-rules:
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get","list", "create", "watch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: ipcurator
-  labels:
-    app.kubernetes.io/name: k8s_egress_networkpolicy
-    app.kubernetes.io/instance: k8s_egress_networkpolicy-ipcurator
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: ipcurator
-subjects:
-  - kind: ServiceAccount
-    name: ipcurator-sa
-    namespace: ipegress
----
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
