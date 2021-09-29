@@ -23,16 +23,16 @@ pipeline {
     stage('Build') {
       steps {
         echo "Building..."
-        sh 'make build-image'
+        sh 'make build'
       }
     }
     stage('Publish') {
-      when {
-        anyOf {
-          branch "master"
-          branch "main"
-        }
-      }
+      // when {
+      //   anyOf {
+      //     branch "master"
+      //     branch "main"
+      //   }
+      // }
       steps {
         echo "Publish to docker.io and GCR..."
         script {
@@ -40,7 +40,7 @@ pipeline {
             'https://index.docker.io/v1/',
             'dockerhub-username-password'
           ) {
-            sh 'make publish-image'
+            sh 'make publish'
           }
         }
       }
